@@ -97,8 +97,8 @@ void APlayGameMode::GenerateBlock()
 	}
 
 	int Value = FMath::RandRange(Min, Max);
-	EBlockType BlockType = StaticCast<EBlockType>(1);	// Temp
-	//EBlockType BlockType = StaticCast<EBlockType>(Value);
+	//EBlockType BlockType = StaticCast<EBlockType>(1);	// Temp
+	EBlockType BlockType = StaticCast<EBlockType>(Value);
 
 	TSubclassOf<AActor> ActorClass = GameInst->GetBlockClass(BlockType);
 	ABlock* SpawnedBlock = GetWorld()->SpawnActor<ABlock>(ActorClass);
@@ -107,14 +107,16 @@ void APlayGameMode::GenerateBlock()
 		return;
 	}
 
-	FVector GenerateLoc(0.f, 0.f, GetZFromBlock(BlockType));
-
-	SpawnedBlock->SetActorLocation(GenerateLoc);
-	SpawnedBlock->SetBlockType(BlockType);
-
-	Blocks.Add(SpawnedBlock);
-
 	CurBlock = SpawnedBlock;
+	CurBlock->SetBlockType(BlockType);
+
+	/*const FInitData& Data = GameInst->GetInitData();
+	float H = CurBlock->GetHHalfSize() * Data.Rows;*/
+
+	FVector GenerateLoc(0.f, 0.f, GetZFromBlock(BlockType));
+	CurBlock->SetActorLocation(GenerateLoc);
+
+	Blocks.Add(CurBlock);
 	CanGenerate = false;
 }
 

@@ -42,5 +42,6 @@ private:
 	UPROPERTY()
 	class ABlock* CurBlock = nullptr;
 
+	UPROPERTY()
 	TArray<TArray<bool>> Tetris;
 };
