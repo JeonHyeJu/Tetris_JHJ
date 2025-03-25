@@ -7,6 +7,11 @@
 #include "Kismet/GameplayStatics.h"
 #include "Global/GlobalGameInstance.h"
 
+APlayGameMode::~APlayGameMode()
+{
+	Tetris.Empty();
+}
+
 void APlayGameMode::BeginPlay()
 {
 	Super::BeginPlay();
@@ -26,6 +31,8 @@ void APlayGameMode::LazyInit()
 	}
 
 	const FInitData& Data = GameInst->GetInitData();
+	InitData = Data;
+
 	Tetris.Reserve(Data.Rows);
 
 	for (int i = 0; i < Data.Rows; ++i)
@@ -40,7 +47,7 @@ void APlayGameMode::LazyInit()
 		Tetris.Add(Temp);
 	}
 
-	FrameHeight = (Data.Rows + 1) * Data.Radius + FloorHeight;
+	FrameZEnd = Data.Rows * Data.Radius;
 	FrameYEnd = FMath::CeilToFloat((Data.Cols - 1) * Data.Radius * .5f);
 	FrameYStart = -FrameYEnd;
 }
@@ -62,17 +69,6 @@ void APlayGameMode::Tick(float _DeltaTime)
 	{
 		GenerateBlock();
 	}
-}
-
-float APlayGameMode::GetZFromBlock(EBlockType _BlockType)
-{
-	float Z = 1175.f;
-	if (_BlockType == EBlockType::LeftRicky || _BlockType == EBlockType::RightRicky)
-	{
-		Z = 1125.f;
-	}
-
-	return Z;
 }
 
 void APlayGameMode::GenerateBlock()
@@ -97,8 +93,8 @@ void APlayGameMode::GenerateBlock()
 	}
 
 	int Value = FMath::RandRange(Min, Max);
-	//EBlockType BlockType = StaticCast<EBlockType>(1);	// Temp
-	EBlockType BlockType = StaticCast<EBlockType>(Value);
+	EBlockType BlockType = StaticCast<EBlockType>(0);	// Temp
+	//EBlockType BlockType = StaticCast<EBlockType>(Value);
 
 	TSubclassOf<AActor> ActorClass = GameInst->GetBlockClass(BlockType);
 	ABlock* SpawnedBlock = GetWorld()->SpawnActor<ABlock>(ActorClass);
@@ -109,26 +105,80 @@ void APlayGameMode::GenerateBlock()
 
 	CurBlock = SpawnedBlock;
 	CurBlock->SetBlockType(BlockType);
-
-	/*const FInitData& Data = GameInst->GetInitData();
-	float H = CurBlock->GetHHalfSize() * Data.Rows;*/
-
-	FVector GenerateLoc(0.f, 0.f, GetZFromBlock(BlockType));
-	CurBlock->SetActorLocation(GenerateLoc);
+	CurBlock->SetActorLocation(FVector(0.f, 0.f, FrameZEnd));
 
 	Blocks.Add(CurBlock);
 	CanGenerate = false;
 }
 
-void APlayGameMode::SetTetrisLocation(EBlockDirection _Dir)
+bool APlayGameMode::IsOccupied(const TPair<int, int>& _Pair)
 {
-	float Z = CurBlock->GetActorLocation().Z;
-	UE_LOG(LogTemp, Warning, TEXT("Z: %f, Height: %f"), Z, FrameHeight);
-
-	if (Z <= FrameHeight)
+	int IdxI = _Pair.Key;
+	int IdxJ = _Pair.Value;
+	if (IdxI < 0 || IdxJ < 0)
 	{
-
+		return true;
 	}
+	if (IdxI >= InitData.Rows || IdxJ >= InitData.Cols)
+	{
+		return true;
+	}
+	if (Tetris[IdxI][IdxJ])
+	{
+		return true;
+	}
+
+	return false;
+}
+
+bool APlayGameMode::CanMove(int I, int J)
+{
+	TArray<TPair<int, int>> Idxs = CurBlock->GetBlockIndices(I, J);
+
+	bool IsAllPass = true;
+	for (int i = 0, size = Idxs.Num(); i < size; ++i)
+	{
+		if (IsOccupied(Idxs[i]))
+		{
+			IsAllPass = false;
+			break;
+		}
+	}
+
+	return IsAllPass;
+}
+
+void APlayGameMode::SetTetris(int I, int J)
+{
+	TArray<TPair<int, int>> Idxs = CurBlock->GetBlockIndices(I, J);
+
+	for (int i = 0, size = Idxs.Num(); i < size; ++i)
+	{
+		Tetris[Idxs[i].Key][Idxs[i].Value] = true;
+	}
+}
+
+void APlayGameMode::UpdateTetrisLocation()
+{
+	FrameYEnd;
+	FVector Loc = CurBlock->GetActorLocation();
+	Loc.Y -= FrameYStart;
+	Loc.Z -= FrameZStart;
+
+	int I = StaticCast<int>(Loc.Z / DIAMETER);
+	int J = StaticCast<int>(Loc.Y / DIAMETER);
+	//UE_LOG(LogTemp, Warning, TEXT("%d, %d"), I, J);
+
+	// TODO: Subtract
+	EBlockType BlockType = CurBlock->GetBlockType();
+
+	if (CanMove(I, J))
+	{
+		SetTetris(I, J);
+	}
+
+	Tetris;
+	int a = 0;
 }
 
 void APlayGameMode::MoveBlock(EBlockDirection _Dir)
@@ -138,39 +188,53 @@ void APlayGameMode::MoveBlock(EBlockDirection _Dir)
 		return;
 	}
 
-	FVector Loc = CurBlock->GetActorLocation();
+	FVector DstLoc = CurBlock->GetActorLocation();
 	float SideSize = CurBlock->GetWHalfSize();
 
 	if (_Dir == EBlockDirection::Left)
 	{
-		Loc.Y -= SideSize;
+		DstLoc.Y -= SideSize;
 
-		if (Loc.Y <= FrameYStart)
+		/*if (Loc.Y <= FrameYStart)
 		{
 			return;
-		}
+		}*/
 	}
 	else if (_Dir == EBlockDirection::Right)
 	{
-		Loc.Y += SideSize;
+		DstLoc.Y += SideSize;
 
-		if (Loc.Y >= FrameYEnd)
+		/*if (Loc.Y >= FrameYEnd)
 		{
 			return;
-		}
+		}*/
 	}
 	else if (_Dir == EBlockDirection::Down)
 	{
 		float Size = CurBlock->GetHHalfSize();
-		Loc.Z -= Size;
+		DstLoc.Z -= Size;
 
-		if (Loc.Z <= FloorHeight)
+		/*if (Loc.Z <= FrameZStart)
 		{
 			CanGenerate = true;
+			UpdateTetrisLocation();
 			return;
+		}*/
+	}
+
+	int I = StaticCast<int>((DstLoc.Z - FrameZStart) / DIAMETER);
+	int J = StaticCast<int>((DstLoc.Y - FrameYStart) / DIAMETER);
+
+	if (CanMove(I, J))
+	{
+		CurBlock->Move(_Dir);
+	}
+	else
+	{
+		if (_Dir == EBlockDirection::Down)
+		{
+			CanGenerate = true;
+			UpdateTetrisLocation();
 		}
 	}
-	
-	CurBlock->Move(_Dir);
-	SetTetrisLocation(_Dir);
 }

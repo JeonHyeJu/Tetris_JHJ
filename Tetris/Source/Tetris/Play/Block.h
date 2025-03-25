@@ -18,6 +18,8 @@ public:
 
 	void Move(EBlockDirection _Dir);
 	void SetBlockType(EBlockType _Type);
+	EBlockType GetBlockType() const;
+	TArray<TPair<int, int>> GetBlockIndices(int I, int J);
 
 	float GetWHalfSize() const;
 	float GetHHalfSize() const;

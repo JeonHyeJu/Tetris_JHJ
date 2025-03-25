@@ -14,6 +14,8 @@ UCLASS()
 class TETRIS_API APlayGameMode : public AGameMode
 {
 	GENERATED_BODY()
+
+	~APlayGameMode();
 	
 	void BeginPlay() override;
 	void Tick(float _DeltaTime) override;
@@ -23,9 +25,11 @@ public:
 
 private:
 	void LazyInit();
-	float GetZFromBlock(EBlockType _BlockType);
 	void GenerateBlock();
-	void SetTetrisLocation(EBlockDirection _Dir);
+	void UpdateTetrisLocation();
+	bool IsOccupied(const TPair<int, int>& _Pair);
+	bool CanMove(int I, int J);
+	void SetTetris(int I, int J);
 
 	bool IsTouchedFloor = false;
 	bool IsLazyInited = false;
@@ -33,8 +37,9 @@ private:
 
 	float FrameYStart = 0.f;
 	float FrameYEnd = 0.f;
-	float FrameHeight = 0.f;
-	float FloorHeight = 75.f;
+	float FrameZEnd = 0.f;
+	float FrameZStart = 100.f;
+	const float DIAMETER = 100.f;	// Temp
 
 	UPROPERTY()
 	TArray<AActor*> Blocks;
@@ -42,6 +47,7 @@ private:
 	UPROPERTY()
 	class ABlock* CurBlock = nullptr;
 
-	UPROPERTY()
 	TArray<TArray<bool>> Tetris;
+
+	FInitData InitData;
 };

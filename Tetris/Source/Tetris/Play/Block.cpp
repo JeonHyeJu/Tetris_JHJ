@@ -25,9 +25,30 @@ void ABlock::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+EBlockType ABlock::GetBlockType() const
+{
+	return BlockType;
+}
+
 void ABlock::SetBlockType(EBlockType _Type)
 {
 	BlockType = _Type;
+}
+
+TArray<TPair<int, int>> ABlock::GetBlockIndices(int I, int J)
+{
+	TArray<TPair<int, int>> Idxs;
+	Idxs.Reserve(4);
+
+	if (BlockType == EBlockType::Hero)
+	{
+		for (int i = -1; i < 3; ++i)
+		{
+			Idxs.Add(TPair<int, int>{ I + i, J });
+		}
+	}
+
+	return Idxs;
 }
 
 float ABlock::GetWHalfSize() const
@@ -70,7 +91,7 @@ float ABlock::GetHHalfSize() const
 	float Size = 0.f;
 	if (BlockType == EBlockType::Hero)
 	{
-		Size = MOVE_SPACE * .5f;
+		Size = MOVE_SPACE * 2.f;
 	}
 	else if (BlockType == EBlockType::Teewee)
 	{
