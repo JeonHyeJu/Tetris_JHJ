@@ -6,9 +6,9 @@
 
 TSubclassOf<AActor> UGlobalGameInstance::GetBlockClass(EBlockType _Type)
 {
-	UE_LOG(LogTemp, Error, TEXT("Data table is nullptr"));
 	if (BlockDataTable == nullptr)
 	{
+		UE_LOG(LogTemp, Error, TEXT("Data table is nullptr"));
 		return nullptr;
 	}
 
@@ -41,10 +41,18 @@ TSubclassOf<AActor> UGlobalGameInstance::GetBlockClass(EBlockType _Type)
 	FBlockDataTableRow* Row = BlockDataTable->FindRow<FBlockDataTableRow>(Name, nullptr);
 	if (Row)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Found Class: %s"), *Row->BP_BlockClass->GetName());
-
 		return Row->BP_BlockClass;
 	}
 
 	return nullptr;
+}
+
+const FInitData& UGlobalGameInstance::GetInitData() const
+{
+	return InitData;
+}
+
+void UGlobalGameInstance::SetInitData(const FInitData& _Data)
+{
+	InitData = _Data;
 }

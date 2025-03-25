@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Global/GlobalData.h"
 #include "GameFramework/Character.h"
 #include "PlayCharacter.generated.h"
 
@@ -14,7 +15,7 @@ class TETRIS_API APlayCharacter : public ACharacter
 public:
 	APlayCharacter();
 
-	virtual void Tick(float DeltaTime) override;
+	virtual void Tick(float _DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UFUNCTION(BlueprintCallable)
@@ -23,4 +24,11 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+private:
+	EBlockDirection GetDirection(const FVector2D& _Vec);
+
+	const float MOVE_SEC = .25f;
+
+	float ElapsedMoveSecs = 0.f;
+	bool CanMove = false;
 };

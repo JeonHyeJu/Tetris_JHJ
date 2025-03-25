@@ -31,7 +31,6 @@ void APlayGameMode::LazyInit()
 	for (int i = 0; i < Data.Rows; ++i)
 	{
 		TArray<bool> Temp;
-		Temp.Reserve(Data.Cols);
 		for (int j = 0; j < Data.Cols; ++j)
 		{
 			Temp.Add(false);
@@ -40,9 +39,7 @@ void APlayGameMode::LazyInit()
 		Tetris.Add(Temp);
 	}
 
-	FrameHeight = (Data.Rows + 1) * Data.Radius + FloorHeight;
-	FrameYEnd = FMath::CeilToFloat((Data.Cols - 1) * Data.Radius * .5f);
-	FrameYStart = -FrameYEnd;
+	FrameHeight = Data.Rows * Data.Radius;
 }
 
 void APlayGameMode::Tick(float _DeltaTime)
@@ -51,6 +48,7 @@ void APlayGameMode::Tick(float _DeltaTime)
 
 	// 하나만 존재
 	static float ElapsedSecs = 0.f;
+	static bool IsLazyInited = false;
 
 	if (!IsLazyInited)
 	{
@@ -58,8 +56,11 @@ void APlayGameMode::Tick(float _DeltaTime)
 		LazyInit();
 	}
 
-	if (CanGenerate)
+	ElapsedSecs += _DeltaTime;
+	if (ElapsedSecs >= .5f)
 	{
+		ElapsedSecs = 0.f;
+		//CanGenerate = true;		// Temp
 		GenerateBlock();
 	}
 }
@@ -120,13 +121,7 @@ void APlayGameMode::GenerateBlock()
 
 void APlayGameMode::SetTetrisLocation(EBlockDirection _Dir)
 {
-	float Z = CurBlock->GetActorLocation().Z;
-	UE_LOG(LogTemp, Warning, TEXT("Z: %f, Height: %f"), Z, FrameHeight);
 
-	if (Z <= FrameHeight)
-	{
-
-	}
 }
 
 void APlayGameMode::MoveBlock(EBlockDirection _Dir)
@@ -136,39 +131,10 @@ void APlayGameMode::MoveBlock(EBlockDirection _Dir)
 		return;
 	}
 
-	FVector Loc = CurBlock->GetActorLocation();
-	float SideSize = CurBlock->GetWHalfSize();
-
-	if (_Dir == EBlockDirection::Left)
-	{
-		Loc.Y -= SideSize;
-
-		if (Loc.Y <= FrameYStart)
-		{
-			return;
-		}
-	}
-	else if (_Dir == EBlockDirection::Right)
-	{
-		Loc.Y += SideSize;
-
-		if (Loc.Y >= FrameYEnd)
-		{
-			return;
-		}
-	}
-	else if (_Dir == EBlockDirection::Down)
-	{
-		float Size = CurBlock->GetHHalfSize();
-		Loc.Z -= Size;
-
-		if (Loc.Z <= FloorHeight)
-		{
-			CanGenerate = true;
-			return;
-		}
-	}
-	
 	CurBlock->Move(_Dir);
-	SetTetrisLocation(_Dir);
+
+	float Z = CurBlock->GetActorLocation().Z;
+
+	UE_LOG(LogTemp, Warning, TEXT("Z: %f, Height: %f"), Z, FrameHeight);
+	//SetTetrisLocation(_Dir);
 }

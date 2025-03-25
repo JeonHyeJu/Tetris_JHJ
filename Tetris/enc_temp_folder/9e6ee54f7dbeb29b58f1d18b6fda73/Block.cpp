@@ -30,74 +30,40 @@ void ABlock::SetBlockType(EBlockType _Type)
 	BlockType = _Type;
 }
 
-float ABlock::GetWHalfSize() const
+bool ABlock::CanMove()
 {
-	float Size = 0.f;
+	bool IsMove = false;
+
 	if (BlockType == EBlockType::Hero)
 	{
-		Size = MOVE_SPACE * .5f;
+
 	}
 	else if (BlockType == EBlockType::Teewee)
 	{
-		Size = MOVE_SPACE + MOVE_SPACE * .5f;
+
 	}
 	else if (BlockType == EBlockType::SmashBody)
 	{
-		Size = MOVE_SPACE;
+
 	}
 	else if (BlockType == EBlockType::LeftRicky)
 	{
-		Size = MOVE_SPACE + MOVE_SPACE * .5f;
+
 	}
 	else if (BlockType == EBlockType::RightRicky)
 	{
-		Size = MOVE_SPACE + MOVE_SPACE * .5f;
+
 	}
 	else if (BlockType == EBlockType::Cleveland)
 	{
-		Size = MOVE_SPACE + MOVE_SPACE * .5f;
+
 	}
 	else if (BlockType == EBlockType::RhodeIsland)
 	{
-		Size = MOVE_SPACE + MOVE_SPACE * .5f;
+
 	}
 
-	return Size;
-}
-
-float ABlock::GetHHalfSize() const
-{
-	float Size = 0.f;
-	if (BlockType == EBlockType::Hero)
-	{
-		Size = MOVE_SPACE * .5f;
-	}
-	else if (BlockType == EBlockType::Teewee)
-	{
-		Size = MOVE_SPACE;
-	}
-	else if (BlockType == EBlockType::SmashBody)
-	{
-		Size = MOVE_SPACE;
-	}
-	else if (BlockType == EBlockType::LeftRicky)
-	{
-		Size = MOVE_SPACE;
-	}
-	else if (BlockType == EBlockType::RightRicky)
-	{
-		Size = MOVE_SPACE;
-	}
-	else if (BlockType == EBlockType::Cleveland)
-	{
-		Size = MOVE_SPACE;
-	}
-	else if (BlockType == EBlockType::RhodeIsland)
-	{
-		Size = MOVE_SPACE;
-	}
-
-	return Size;
+	return IsMove;
 }
 
 void ABlock::Move(EBlockDirection _Dir)

@@ -19,13 +19,12 @@ public:
 	void Move(EBlockDirection _Dir);
 	void SetBlockType(EBlockType _Type);
 
-	float GetWHalfSize() const;
-	float GetHHalfSize() const;
-
 protected:
 	virtual void BeginPlay() override;
 	
 private:
+	bool CanMove();
+
 	EBlockType BlockType = EBlockType::Size;
 
 	// TODO: move to static literal

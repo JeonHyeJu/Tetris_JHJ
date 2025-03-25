@@ -27,14 +27,10 @@ private:
 	void GenerateBlock();
 	void SetTetrisLocation(EBlockDirection _Dir);
 
-	bool IsTouchedFloor = false;
-	bool IsLazyInited = false;
 	bool CanGenerate = true;
+	//bool CanGenerate = false;
 
-	float FrameYStart = 0.f;
-	float FrameYEnd = 0.f;
 	float FrameHeight = 0.f;
-	float FloorHeight = 75.f;
 
 	UPROPERTY()
 	TArray<AActor*> Blocks;

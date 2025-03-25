@@ -6,17 +6,38 @@
 #include "UObject/NoExportTypes.h"
 #include "GlobalData.generated.h"
 
+USTRUCT()
+struct FInitData
+{
+	GENERATED_BODY()
 
-UENUM(BlueprintType)
+	int Rows = 0;
+	int Cols = 0;
+	float Radius = 0.f;
+};
+
+UENUM()
+enum class EBlockDirection : int8
+{
+	None = -1,
+	Up,
+	Down,
+	Left,
+	Right,
+};
+
+UENUM()
 enum class EBlockType : uint8
 {
-	Hero UMETA(DisplayName="Hero"),
-	Teewee UMETA(DisplayName="Teewee"),
-	SmashBody UMETA(DisplayName="SmashBody"),
-	LeftRicky UMETA(DisplayName="LeftRicky"),
-	RightRicky UMETA(DisplayName="RightRicky"),
-	Cleveland UMETA(DisplayName="Cleveland"),
-	RhodeIsland UMETA(DisplayName="RhodeIsland"),
+	Hero,
+	Teewee,
+	SmashBody,
+	LeftRicky,
+	RightRicky,
+	Cleveland,
+	RhodeIsland,
+	Size,
+	OutBlock,
 };
 
 /**

@@ -18,7 +18,12 @@ class TETRIS_API UGlobalGameInstance : public UGameInstance
 public:
 	TSubclassOf<AActor> GetBlockClass(EBlockType _Type);
 
+	const FInitData& GetInitData() const;
+	void SetInitData(const FInitData& _Data);
+
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Global", meta = (AllowPrivateAccess="true"))
 	UDataTable* BlockDataTable = nullptr;
+
+	FInitData InitData;
 };
