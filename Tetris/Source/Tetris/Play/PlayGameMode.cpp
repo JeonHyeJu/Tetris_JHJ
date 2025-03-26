@@ -93,8 +93,8 @@ void APlayGameMode::GenerateBlock()
 	}
 
 	int Value = FMath::RandRange(Min, Max);
-	EBlockType BlockType = StaticCast<EBlockType>(0);	// Temp
-	//EBlockType BlockType = StaticCast<EBlockType>(Value);
+	//EBlockType BlockType = StaticCast<EBlockType>(0);	// Temp
+	EBlockType BlockType = StaticCast<EBlockType>(Value);
 
 	int Mid = StaticCast<int>(InitData.Cols * .5f);
 
@@ -120,7 +120,6 @@ void APlayGameMode::GenerateBlock()
 	CurBlock->SetBlockType(BlockType);
 	CurBlock->SetActorLocation(GenerateLoc);
 
-	Blocks.Add(CurBlock);
 	CanGenerate = false;
 }
 
@@ -161,6 +160,116 @@ bool APlayGameMode::CanMove(int I, int J, int _Degree)
 	return IsAllPass;
 }
 
+void APlayGameMode::TurnToStone()
+{
+	UWorld* Level = GetWorld();
+	if (Level == nullptr)
+	{
+		return;
+	}
+
+	if (CurBlock == nullptr)
+	{
+		return;
+	}
+
+	FVector Loc = CurBlock->GetActorLocation();
+	EBlockType BlockType = CurBlock->GetBlockType();
+	const TArray<TPair<int, int>>&& Idxs = CurBlock->GetBlockIndices(CurBlock->Y, CurBlock->X);
+
+	for (int j = 0, ArrSize = Idxs.Num(); j < ArrSize; ++j)
+	{
+		const TPair<int, int>& Pair = Idxs[j];
+		int Y = (InitData.Rows - Pair.Key) * 100.f + 50.f;
+		int X = Pair.Value * 100.f + FrameYStart;
+
+		AActor* Actor = Level->SpawnActor<AActor>(OneBlock);
+		Actor->SetActorLocation(FVector(0.f, X, Y));
+
+		FBlockData Data;
+		Data.Block = Actor;
+		Data.I = Pair.Key;
+		Data.J = Pair.Value;
+		StaticBlocks.Add(Data);
+	}
+
+	CurBlock->SetHidden(true);
+	CurBlock->Destroy();
+}
+
+void APlayGameMode::CheckToStone()
+{
+	TArray<int> RemoveRows;
+	int Rows = Tetris.Num();
+	for (int i = 0; i < Rows; ++i)
+	{
+		bool IsAllPass = true;
+		int Cols = Tetris[i].Num();
+		for (int j = 0; j < Cols; ++j)
+		{
+			if (Tetris[i][j] == false)
+			{
+				IsAllPass = false;
+			}
+		}
+
+		if (IsAllPass)
+		{
+			RemoveRows.Add(i);
+
+			for (int j = 0; j < Cols; ++j)
+			{
+				Tetris[i][j] = false;
+			}
+		}
+	}
+
+	TArray<int> RemoveIdx;
+	int Size = StaticBlocks.Num();
+	int RmSize = RemoveRows.Num();
+	for (int i = 0; i < Size; ++i)
+	{
+		if (StaticBlocks[i].IsDestroied)
+		{
+			continue;
+		}
+
+		bool IsRemove = false;
+		for (int j = 0; j < RmSize; ++j)
+		{
+			if (StaticBlocks[i].I == RemoveRows[j])
+			{
+				IsRemove = true;
+				break;
+			}
+		}
+
+		if (IsRemove)
+		{
+			StaticBlocks[i].Block->SetHidden(true);
+			StaticBlocks[i].Block->Destroy();
+			StaticBlocks[i].IsDestroied = true;
+			RemoveIdx.Add(i);
+		}
+	}
+
+	RemoveIdx.Sort([=](int _V1, int _V2) {
+		return _V1 > _V2;
+	});
+
+	StaticBlocks;
+	Tetris;
+	int a = 0;
+
+	for (int i = 0; i < RemoveIdx.Num(); ++i)
+	{
+		StaticBlocks.RemoveAt(RemoveIdx[i]);
+	}
+	StaticBlocks;
+	Tetris;
+	int b = 0;
+}
+
 bool APlayGameMode::SetTetris(int I, int J)
 {
 	TArray<TPair<int, int>> Idxs = CurBlock->GetBlockIndices(I, J);
@@ -185,12 +294,9 @@ bool APlayGameMode::SetTetris(int I, int J)
 
 void APlayGameMode::UpdateTetrisLocation(int I, int J)
 {
-	EBlockType BlockType = CurBlock->GetBlockType();
-
-	SetTetris(I, J);
-
-	Tetris;
-	int a = 0;
+	bool Res = SetTetris(I, J);
+	TurnToStone();
+	CheckToStone();
 }
 
 void APlayGameMode::MoveBlock(EBlockDirection _Dir)

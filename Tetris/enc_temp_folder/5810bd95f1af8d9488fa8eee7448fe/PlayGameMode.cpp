@@ -93,8 +93,10 @@ void APlayGameMode::GenerateBlock()
 	}
 
 	int Value = FMath::RandRange(Min, Max);
-	EBlockType BlockType = StaticCast<EBlockType>(1);	// Temp
+	EBlockType BlockType = StaticCast<EBlockType>(0);	// Temp
 	//EBlockType BlockType = StaticCast<EBlockType>(Value);
+
+	int Mid = StaticCast<int>(InitData.Cols * .5f);
 
 	TSubclassOf<AActor> ActorClass = GameInst->GetBlockClass(BlockType);
 	ABlock* SpawnedBlock = GetWorld()->SpawnActor<ABlock>(ActorClass);
@@ -103,17 +105,20 @@ void APlayGameMode::GenerateBlock()
 		return;
 	}
 
+	CurBlock = SpawnedBlock;
+	CurBlock->Y = 1;
+	CurBlock->X = Mid;
+
 	FVector GenerateLoc(0.f, 0.f, FrameZEnd);
 	if (BlockType == EBlockType::Hero)
 	{
 		GenerateLoc.Z -= 100.f;
+		CurBlock->Y = 2;
+		CurBlock->X = Mid;
 	}
-
-	CurBlock = SpawnedBlock;
+	
 	CurBlock->SetBlockType(BlockType);
 	CurBlock->SetActorLocation(GenerateLoc);
-	CurBlock->Y = 8;
-	CurBlock->X = 2;
 
 	Blocks.Add(CurBlock);
 	CanGenerate = false;
@@ -156,6 +161,114 @@ bool APlayGameMode::CanMove(int I, int J, int _Degree)
 	return IsAllPass;
 }
 
+void APlayGameMode::TurnToStone()
+{
+	UWorld* Level = GetWorld();
+	if (Level == nullptr)
+	{
+		return;
+	}
+
+	int Size = Blocks.Num();
+	for (int i = 0; i < Size; ++i)
+	{
+		ABlock* Block = Blocks[i];
+		if (Block == nullptr)
+		{
+			continue;
+		}
+
+		FVector Loc = Block->GetActorLocation();
+		EBlockType BlockType = Block->GetBlockType();
+		const TArray<TPair<int, int>>&& Idxs = Block->GetBlockIndices(Block->Y, Block->X);
+
+		for (int j = 0, ArrSize = Idxs.Num(); j < ArrSize; ++j)
+		{
+			const TPair<int, int>& Pair = Idxs[j];
+			int Y = (InitData.Rows - Pair.Key) * 100.f + 50.f;
+			int X = Pair.Value * 100.f + FrameYStart;
+
+			AActor* Actor = Level->SpawnActor<AActor>(OneBlock);
+			Actor->SetActorLocation(FVector(0.f, X, Y));
+
+			FBlockData Data;
+			Data.Block = Actor;
+			Data.I = Pair.Key;
+			Data.J = Pair.Value;
+			StaticBlocks.Add(Data);
+		}
+
+		Block->SetHidden(true);
+		Block->Destroy();
+	}
+}
+
+void APlayGameMode::CheckToStone()
+{
+	TArray<int> RemoveRows;
+	int Rows = Tetris.Num();
+	for (int i = 0; i < Rows; ++i)
+	{
+		bool IsAllPass = true;
+		int Cols = Tetris[i].Num();
+		for (int j = 0; j < Cols; ++j)
+		{
+			if (Tetris[i][j] == false)
+			{
+				IsAllPass = false;
+			}
+		}
+
+		if (IsAllPass)
+		{
+			RemoveRows.Add(i);
+
+			for (int j = 0; j < Cols; ++j)
+			{
+				Tetris[i][j] = false;
+			}
+		}
+	}
+
+	TArray<int> RemoveIdx;
+	int Size = StaticBlocks.Num();
+	int RmSize = RemoveRows.Num();
+	for (int i = 0; i < Size; ++i)
+	{
+		if (StaticBlocks[i].IsDestroied)
+		{
+			continue;
+		}
+
+		bool IsRemove = false;
+		for (int j = 0; j < RmSize; ++j)
+		{
+			if (StaticBlocks[i].I == RemoveRows[j])
+			{
+				IsRemove = true;
+				break;
+			}
+		}
+
+		if (IsRemove)
+		{
+			StaticBlocks[i].Block->SetHidden(true);
+			StaticBlocks[i].Block->Destroy();
+			StaticBlocks[i].IsDestroied = true;
+			RemoveIdx.Add(i);
+		}
+	}
+
+	RemoveIdx.Sort([=](int _V1, int _V2) {
+		return _V1 > _V2;
+	});
+
+	for (int i = 0; i < RemoveIdx.Num(); ++i)
+	{
+		StaticBlocks.RemoveAt(RemoveIdx[i]);
+	}
+}
+
 bool APlayGameMode::SetTetris(int I, int J)
 {
 	TArray<TPair<int, int>> Idxs = CurBlock->GetBlockIndices(I, J);
@@ -180,12 +293,9 @@ bool APlayGameMode::SetTetris(int I, int J)
 
 void APlayGameMode::UpdateTetrisLocation(int I, int J)
 {
-	EBlockType BlockType = CurBlock->GetBlockType();
-
-	SetTetris(I, J);
-
-	Tetris;
-	int a = 0;
+	bool Res = SetTetris(I, J);
+	TurnToStone();
+	CheckToStone();
 }
 
 void APlayGameMode::MoveBlock(EBlockDirection _Dir)
@@ -208,15 +318,12 @@ void APlayGameMode::MoveBlock(EBlockDirection _Dir)
 	}
 	else if (_Dir == EBlockDirection::Down)
 	{
-		I -= 1;
+		I += 1;
 	}
-
-	UE_LOG(LogTemp, Warning, TEXT("%d, %d"), I, J);
 
 	if (CanMove(I, J))
 	{
-		//CurBlock->Move(_Dir);
-		CurBlock->Move(I, J, FrameYStart);
+		CurBlock->Move((InitData.Rows - 1) - I, J, FrameYStart);
 		CurBlock->Y = I;
 		CurBlock->X = J;
 	}
@@ -225,7 +332,7 @@ void APlayGameMode::MoveBlock(EBlockDirection _Dir)
 		if (_Dir == EBlockDirection::Down)
 		{
 			CanGenerate = true;
-			//UpdateTetrisLocation(I - 1, J);
+			UpdateTetrisLocation(I - 1, J);
 		}
 	}
 }
@@ -237,10 +344,8 @@ void APlayGameMode::RotateBlock()
 		return;
 	}
 
-	FVector CurLoc = CurBlock->GetActorLocation();
-	int I = InitData.Rows - StaticCast<int>(CurLoc.Z / DIAMETER) + 1;
-	int J = StaticCast<int>((CurLoc.Y + FrameYEnd) / DIAMETER);
-	UE_LOG(LogTemp, Warning, TEXT("%d, %d"), I, J);
+	int I = CurBlock->Y;
+	int J = CurBlock->X;
 
 	int Degree = CurBlock->GetFutureDegree();
 	if (CanMove(I, J, Degree))

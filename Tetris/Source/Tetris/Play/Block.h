@@ -25,9 +25,6 @@ public:
 	TArray<TPair<int, int>> GetBlockIndices(int I, int J, int _Degree=0);
 	void SetIndexes(int I, int J);
 
-	float GetWHalfSize() const;
-	float GetHHalfSize() const;
-
 	// Temp
 	int X = 0;
 	int Y = 0;
