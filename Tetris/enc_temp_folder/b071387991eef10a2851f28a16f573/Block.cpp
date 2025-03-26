@@ -47,39 +47,6 @@ TArray<TPair<int, int>> ABlock::GetBlockIndices(int I, int J)
 			Idxs.Add(TPair<int, int>{ I + i, J });
 		}
 	}
-	else if (BlockType == EBlockType::Teewee)
-	{
-		Idxs.Add(TPair<int, int>{ I - 1, J });
-		Idxs.Add(TPair<int, int>{ I, J });
-		Idxs.Add(TPair<int, int>{ I, J - 1 });
-		Idxs.Add(TPair<int, int>{ I, J + 1 });
-	}
-	else if (BlockType == EBlockType::SmashBody)
-	{
-		Idxs.Add(TPair<int, int>{ I - 1, J + 1 });
-		Idxs.Add(TPair<int, int>{ I - 1, J + 2 });
-		Idxs.Add(TPair<int, int>{ I, J + 1 });
-		Idxs.Add(TPair<int, int>{ I, J + 2 });
-	}
-	else if (BlockType == EBlockType::LeftRicky)
-	{
-		Idxs.Add(TPair<int, int>{ I, J });
-		Idxs.Add(TPair<int, int>{ I - 1, J });
-		Idxs.Add(TPair<int, int>{ I, J + 1 });
-		Idxs.Add(TPair<int, int>{ I, J + 2 });
-	}
-	else if (BlockType == EBlockType::RightRicky)
-	{
-
-	}
-	else if (BlockType == EBlockType::Cleveland)
-	{
-
-	}
-	else if (BlockType == EBlockType::RhodeIsland)
-	{
-
-	}
 
 	return Idxs;
 }
@@ -89,7 +56,7 @@ float ABlock::GetWHalfSize() const
 	float Size = 0.f;
 	if (BlockType == EBlockType::Hero)
 	{
-		Size = MOVE_SPACE;
+		Size = MOVE_SPACE * .5f;
 	}
 	else if (BlockType == EBlockType::Teewee)
 	{

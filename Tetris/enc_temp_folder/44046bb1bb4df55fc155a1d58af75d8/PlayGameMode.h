@@ -29,7 +29,7 @@ private:
 	void UpdateTetrisLocation(int I, int J);
 	bool IsOccupied(const TPair<int, int>& _Pair);
 	bool CanMove(int I, int J);
-	bool SetTetris(int I, int J);
+	void SetTetris(int I, int J);
 
 	bool IsTouchedFloor = false;
 	bool IsLazyInited = false;
