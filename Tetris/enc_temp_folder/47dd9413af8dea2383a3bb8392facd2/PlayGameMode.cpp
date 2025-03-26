@@ -199,13 +199,6 @@ void APlayGameMode::TurnToStone()
 
 void APlayGameMode::CheckToStone()
 {
-	if (CurBlock)
-	{
-		CurBlock->SetHidden(true);
-		CurBlock->Destroy();
-		CurBlock = nullptr;
-	}
-
 	TArray<int> RemoveRows;
 	int Rows = Tetris.Num();
 	for (int i = Rows - 1; i >= 0; --i)
@@ -223,10 +216,14 @@ void APlayGameMode::CheckToStone()
 		if (IsAllPass)
 		{
 			RemoveRows.Add(i);
+
+			for (int j = 0; j < Cols; ++j)
+			{
+				Tetris[i][j] = false;
+			}
 		}
 	}
 
-	RemoveRows.Sort();
 	int RmSize = RemoveRows.Num();
 	for (int i = 0; i < RmSize; ++i)
 	{
@@ -236,50 +233,58 @@ void APlayGameMode::CheckToStone()
 			continue;
 		}
 
-		for (int j = RmIdx; j > 0; --j)
-		{
-			int Cols = Tetris[j].Num();
-
-			for (int z = 0; z < Cols; ++z)
-			{
-				Tetris[j][z] = Tetris[j - 1][z];
-				Tetris[j - 1][z] = false;
-			}
-		}
-	}
-
-	for (int i = 0, Size = StaticBlocks.Num(); i < Size; ++i)
-	{
-		StaticBlocks[i].Block->Destroy();
-	}
-	StaticBlocks.Empty();
-
-	UWorld* Level = GetWorld();
-	if (Level == nullptr)
-	{
-		return;
-	}
-
-	for (int i = 0; i < Rows; ++i)
-	{
-		int Cols = Tetris[i].Num();
+		int Cols = Tetris[RmIdx].Num();
 		for (int j = 0; j < Cols; ++j)
 		{
-			if (Tetris[i][j])
+			Tetris[RmIdx][j] = Tetris[RmIdx - 1][j];
+			Tetris[RmIdx - 1][j] = false;
+		}
+	}
+
+	TArray<int> RemoveIdx;
+	int Size = StaticBlocks.Num();
+	for (int i = 0; i < Size; ++i)
+	{
+		if (StaticBlocks[i].IsDestroied)
+		{
+			continue;
+		}
+
+		bool IsRemove = false;
+		for (int j = 0; j < RmSize; ++j)
+		{
+			if (StaticBlocks[i].I == RemoveRows[j])
 			{
-				int Y = (InitData.Rows - i) * 100.f + 50.f;
-				int X = j * 100.f + FrameYStart;
-
-				AActor* Actor = Level->SpawnActor<AActor>(OneBlock);
-				Actor->SetActorLocation(FVector(0.f, X, Y));
-
-				FBlockData Data;
-				Data.Block = Actor;
-				Data.I = i;
-				Data.J = j;
-				StaticBlocks.Add(Data);
+				IsRemove = true;
+				break;
+			}
+			else if (StaticBlocks[i].I < RemoveRows[j])
+			{
+				float Z = StaticBlocks[i].Block->GetActorLocation().Z;
+				if (Z > 200)
+				{
+					StaticBlocks[i].Block->AddActorLocalOffset(FVector(0.f, 0.f, -100.f));
+					StaticBlocks[i].I += 1;
+				}
 			}
 		}
+
+		if (IsRemove)
+		{
+			StaticBlocks[i].Block->SetHidden(true);
+			StaticBlocks[i].Block->Destroy();
+			StaticBlocks[i].IsDestroied = true;
+			RemoveIdx.Add(i);
+		}
+	}
+
+	RemoveIdx.Sort([=](int _V1, int _V2) {
+		return _V1 > _V2;
+	});
+
+	for (int i = 0; i < RemoveIdx.Num(); ++i)
+	{
+		StaticBlocks.RemoveAt(RemoveIdx[i]);
 	}
 }
 
@@ -308,7 +313,7 @@ bool APlayGameMode::SetTetris(int I, int J)
 void APlayGameMode::UpdateTetrisLocation(int I, int J)
 {
 	bool Res = SetTetris(I, J);
-	//TurnToStone();
+	TurnToStone();
 	CheckToStone();
 }
 
