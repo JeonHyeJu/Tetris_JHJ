@@ -57,15 +57,15 @@ TArray<TPair<int, int>> ABlock::GetBlockIndices(int I, int J, int _Degree)
 
 	if (BlockType == EBlockType::Hero)
 	{
-		for (int i = -2; i < 2; ++i)
+		for (int i = -1; i < 3; ++i)
 		{
 			if (_Degree == 90 || _Degree == 270)
 			{
-				Idxs.Add(TPair<int, int>{ I, J + i });
+				Idxs.Add(TPair<int, int>{ I, J + i - 1 });
 			}
 			else
 			{
-				Idxs.Add(TPair<int, int>{ I + i, J });
+				Idxs.Add(TPair<int, int>{ I + i - 1, J });
 			}
 		}
 	}
@@ -361,12 +361,12 @@ void ABlock::Rotate()
 	}
 	else if (BlockRotation == 180)
 	{
-		AppendLoc = FVector{ 0.f, 50.f, -50.f };
+		AppendLoc = FVector{ 0.f, 50.f, 50.f };
 		InitialLoc = FVector::ZeroVector;
 	}
 	else if (BlockRotation == 270)
 	{
-		AppendLoc = FVector{ 0.f, 50.f, 50.f };
+		AppendLoc = FVector{ 0.f, 50.f, -50.f };
 		InitialLoc = FVector{ 0.f, 50.f, -50.f };
 	}
 

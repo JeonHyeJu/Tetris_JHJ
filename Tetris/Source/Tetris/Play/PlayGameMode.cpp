@@ -93,8 +93,8 @@ void APlayGameMode::GenerateBlock()
 	}
 
 	int Value = FMath::RandRange(Min, Max);
-	//EBlockType BlockType = StaticCast<EBlockType>(3);	// Temp
-	EBlockType BlockType = StaticCast<EBlockType>(Value);
+	EBlockType BlockType = StaticCast<EBlockType>(0);	// Temp
+	//EBlockType BlockType = StaticCast<EBlockType>(Value);
 
 	int Mid = StaticCast<int>(InitData.Cols * .5f);
 
@@ -113,7 +113,7 @@ void APlayGameMode::GenerateBlock()
 	if (BlockType == EBlockType::Hero)
 	{
 		GenerateLoc.Z -= 100.f;
-		CurBlock->Y = 3;
+		CurBlock->Y = 2;
 		CurBlock->X = Mid;
 	}
 	
