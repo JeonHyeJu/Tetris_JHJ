@@ -22,13 +22,14 @@ class TETRIS_API APlayGameMode : public AGameMode
 
 public:
 	void MoveBlock(EBlockDirection _Dir);
+	void RotateBlock();
 
 private:
 	void LazyInit();
 	void GenerateBlock();
 	void UpdateTetrisLocation(int I, int J);
 	bool IsOccupied(const TPair<int, int>& _Pair);
-	bool CanMove(int I, int J);
+	bool CanMove(int I, int J, int _Degree=0);
 	bool SetTetris(int I, int J);
 
 	bool IsTouchedFloor = false;

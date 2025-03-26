@@ -61,7 +61,7 @@ TArray<TPair<int, int>> ABlock::GetBlockIndices(int I, int J, int _Degree)
 		{
 			if (_Degree == 90 || _Degree == 270)
 			{
-				Idxs.Add(TPair<int, int>{ I, J + i });
+				Idxs.Add(TPair<int, int>{ I - 1, J + i + 1 });
 			}
 			else
 			{
@@ -84,12 +84,13 @@ TArray<TPair<int, int>> ABlock::GetBlockIndices(int I, int J, int _Degree)
 			Idxs.Add(TPair<int, int>{ I - 1, J - 1 });
 			Idxs.Add(TPair<int, int>{ I - 1, J + 1 });
 			Idxs.Add(TPair<int, int>{ I, J });
+			int a = 0;
 		}
 		else if (_Degree == 270)
 		{
-			Idxs.Add(TPair<int, int>{ I - 1, J + 1 });
-			Idxs.Add(TPair<int, int>{ I, J + 1 });
-			Idxs.Add(TPair<int, int>{ I + 1, J + 1 });
+			Idxs.Add(TPair<int, int>{ I - 1, J });
+			Idxs.Add(TPair<int, int>{ I, J - 1 });
+			Idxs.Add(TPair<int, int>{ I + 1, J });
 			Idxs.Add(TPair<int, int>{ I, J });
 		}
 		else
@@ -109,127 +110,31 @@ TArray<TPair<int, int>> ABlock::GetBlockIndices(int I, int J, int _Degree)
 	}
 	else if (BlockType == EBlockType::LeftRicky)
 	{
-		if (_Degree == 90)
-		{
-			Idxs.Add(TPair<int, int>{ I - 1, J - 1 });
-			Idxs.Add(TPair<int, int>{ I, J - 1 });
-			Idxs.Add(TPair<int, int>{ I + 1, J - 1 });
-			Idxs.Add(TPair<int, int>{ I - 1, J });
-		}
-		else if (_Degree == 180)
-		{
-			Idxs.Add(TPair<int, int>{ I - 1, J });
-			Idxs.Add(TPair<int, int>{ I - 1, J - 1 });
-			Idxs.Add(TPair<int, int>{ I - 1, J + 1 });
-			Idxs.Add(TPair<int, int>{ I, J + 1 });
-		}
-		else if (_Degree == 270)
-		{
-			Idxs.Add(TPair<int, int>{ I - 1, J + 1 });
-			Idxs.Add(TPair<int, int>{ I, J + 1 });
-			Idxs.Add(TPair<int, int>{ I + 1, J + 1 });
-			Idxs.Add(TPair<int, int>{ I + 1, J });
-		}
-		else
-		{
-			Idxs.Add(TPair<int, int>{ I, J });
-			Idxs.Add(TPair<int, int>{ I, J - 1 });
-			Idxs.Add(TPair<int, int>{ I - 1, J - 1 });
-			Idxs.Add(TPair<int, int>{ I, J + 1 });
-		}
+		Idxs.Add(TPair<int, int>{ I, J });
+		Idxs.Add(TPair<int, int>{ I, J - 1 });
+		Idxs.Add(TPair<int, int>{ I - 1, J - 1 });
+		Idxs.Add(TPair<int, int>{ I, J + 1 });
 	}
 	else if (BlockType == EBlockType::RightRicky)
 	{
-		if (_Degree == 90)
-		{
-			Idxs.Add(TPair<int, int>{ I - 1, J - 1 });
-			Idxs.Add(TPair<int, int>{ I, J - 1 });
-			Idxs.Add(TPair<int, int>{ I + 1, J - 1 });
-			Idxs.Add(TPair<int, int>{ I + 1, J });
-		}
-		else if (_Degree == 180)
-		{
-			Idxs.Add(TPair<int, int>{ I - 1, J });
-			Idxs.Add(TPair<int, int>{ I - 1, J - 1 });
-			Idxs.Add(TPair<int, int>{ I - 1, J + 1 });
-			Idxs.Add(TPair<int, int>{ I, J - 1 });
-		}
-		else if (_Degree == 270)
-		{
-			Idxs.Add(TPair<int, int>{ I - 1, J + 1 });
-			Idxs.Add(TPair<int, int>{ I, J + 1 });
-			Idxs.Add(TPair<int, int>{ I + 1, J + 1 });
-			Idxs.Add(TPair<int, int>{ I - 1, J });
-		}
-		else
-		{
-			Idxs.Add(TPair<int, int>{ I, J });
-			Idxs.Add(TPair<int, int>{ I, J + 1 });
-			Idxs.Add(TPair<int, int>{ I - 1, J + 1 });
-			Idxs.Add(TPair<int, int>{ I, J - 1 });
-		}
+		Idxs.Add(TPair<int, int>{ I, J });
+		Idxs.Add(TPair<int, int>{ I, J + 1 });
+		Idxs.Add(TPair<int, int>{ I - 1, J + 1 });
+		Idxs.Add(TPair<int, int>{ I, J - 1 });
 	}
 	else if (BlockType == EBlockType::Cleveland)
 	{
-		if (_Degree == 90)
-		{
-			Idxs.Add(TPair<int, int>{ I - 1, J - 1 });
-			Idxs.Add(TPair<int, int>{ I, J - 1 });
-			Idxs.Add(TPair<int, int>{ I, J });
-			Idxs.Add(TPair<int, int>{ I + 1, J });
-		}
-		else if (_Degree == 180)
-		{
-			Idxs.Add(TPair<int, int>{ I, J });
-			Idxs.Add(TPair<int, int>{ I, J - 1 });
-			Idxs.Add(TPair<int, int>{ I - 1, J });
-			Idxs.Add(TPair<int, int>{ I - 1, J + 1 });
-		}
-		else if (_Degree == 270)
-		{
-			Idxs.Add(TPair<int, int>{ I - 1, J + 1 });
-			Idxs.Add(TPair<int, int>{ I, J + 1 });
-			Idxs.Add(TPair<int, int>{ I + 1, J + 1 });
-			Idxs.Add(TPair<int, int>{ I - 1, J });
-		}
-		else
-		{
-			Idxs.Add(TPair<int, int>{ I, J });
-			Idxs.Add(TPair<int, int>{ I - 1, J });
-			Idxs.Add(TPair<int, int>{ I - 1, J + 1 });
-			Idxs.Add(TPair<int, int>{ I, J - 1 });
-		}
+		Idxs.Add(TPair<int, int>{ I, J });
+		Idxs.Add(TPair<int, int>{ I - 1, J });
+		Idxs.Add(TPair<int, int>{ I - 1, J + 1 });
+		Idxs.Add(TPair<int, int>{ I, J - 1 });
 	}
 	else if (BlockType == EBlockType::RhodeIsland)
 	{
-		if (_Degree == 90)
-		{
-			Idxs.Add(TPair<int, int>{ I - 1, J });
-			Idxs.Add(TPair<int, int>{ I, J });
-			Idxs.Add(TPair<int, int>{ I, J - 1 });
-			Idxs.Add(TPair<int, int>{ I + 1, J - 1 });
-		}
-		else if (_Degree == 180)
-		{
-			Idxs.Add(TPair<int, int>{ I - 1, J });
-			Idxs.Add(TPair<int, int>{ I - 1, J - 1 });
-			Idxs.Add(TPair<int, int>{ I, J });
-			Idxs.Add(TPair<int, int>{ I, J + 1 });
-		}
-		else if (_Degree == 270)
-		{
-			Idxs.Add(TPair<int, int>{ I - 1, J + 1 });
-			Idxs.Add(TPair<int, int>{ I, J + 1 });
-			Idxs.Add(TPair<int, int>{ I + 1, J + 1 });
-			Idxs.Add(TPair<int, int>{ I - 1, J });
-		}
-		else
-		{
-			Idxs.Add(TPair<int, int>{ I, J });
-			Idxs.Add(TPair<int, int>{ I - 1, J });
-			Idxs.Add(TPair<int, int>{ I - 1, J - 1 });
-			Idxs.Add(TPair<int, int>{ I, J + 1 });
-		}
+		Idxs.Add(TPair<int, int>{ I, J });
+		Idxs.Add(TPair<int, int>{ I - 1, J });
+		Idxs.Add(TPair<int, int>{ I - 1, J - 1 });
+		Idxs.Add(TPair<int, int>{ I, J + 1 });
 	}
 
 	return Idxs;
@@ -309,8 +214,7 @@ void ABlock::Move(int I, int J, int _Width)
 {
 	const float SIZE = 100.f;
 	FVector Loc(0.f, J * SIZE + _Width, I * SIZE + 200.f);
-
-	SetActorLocation(InitialLoc + Loc);
+	SetActorLocation(Loc);
 }
 
 void ABlock::Move(EBlockDirection _Dir)
@@ -346,32 +250,30 @@ void ABlock::Rotate()
 		return;
 	}
 
-	FVector AppendLoc = FVector::ZeroVector;
 	BlockRotation += 90;
 	if (BlockRotation == 360)
 	{
 		BlockRotation = 0;
-		AppendLoc = FVector{ 0.f, -50.f, 50.f };
-		InitialLoc = FVector::ZeroVector;
-	}
-	else if (BlockRotation == 90)
-	{
-		InitialLoc = FVector{ 0.f, -50.f, -50.f };
-		AppendLoc = InitialLoc;
-	}
-	else if (BlockRotation == 180)
-	{
-		AppendLoc = FVector{ 0.f, 50.f, -50.f };
-		InitialLoc = FVector::ZeroVector;
-	}
-	else if (BlockRotation == 270)
-	{
-		AppendLoc = FVector{ 0.f, 50.f, 50.f };
-		InitialLoc = FVector{ 0.f, 50.f, -50.f };
 	}
 
 	InnerWrapper->SetRelativeRotation(FQuat::MakeFromEuler({ StaticCast<float>(BlockRotation), 0.f, 0.f }));
-	AddActorLocalOffset(AppendLoc);
+
+	if (BlockRotation == 0)
+	{
+		AddActorLocalOffset(FVector{ 0.f, 50.f, 50.f });
+	}
+	else if (BlockRotation == 90)
+	{
+		AddActorLocalOffset(FVector{ 0.f, -50.f, -50.f });
+	}
+	else if (BlockRotation == 180)
+	{
+		AddActorLocalOffset(FVector{ 0.f, 50.f, 50.f });
+	}
+	else if (BlockRotation == 270)
+	{
+		AddActorLocalOffset(FVector{ 0.f, -50.f, 50.f });
+	}
 }
 
 // Temp

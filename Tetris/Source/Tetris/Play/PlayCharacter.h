@@ -19,6 +19,9 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UFUNCTION(BlueprintCallable)
+	void OnInputRotate(bool _IsPressed);
+
+	UFUNCTION(BlueprintCallable)
 	void OnMove(const FVector2D& _Vec);
 
 protected:

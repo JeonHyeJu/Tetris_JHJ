@@ -93,8 +93,10 @@ void APlayGameMode::GenerateBlock()
 	}
 
 	int Value = FMath::RandRange(Min, Max);
-	EBlockType BlockType = StaticCast<EBlockType>(3);	// Temp
-	//EBlockType BlockType = StaticCast<EBlockType>(Value);
+	//EBlockType BlockType = StaticCast<EBlockType>(3);	// Temp
+	EBlockType BlockType = StaticCast<EBlockType>(Value);
+
+	int Mid = StaticCast<int>(InitData.Cols * .5f);
 
 	TSubclassOf<AActor> ActorClass = GameInst->GetBlockClass(BlockType);
 	ABlock* SpawnedBlock = GetWorld()->SpawnActor<ABlock>(ActorClass);
@@ -103,13 +105,18 @@ void APlayGameMode::GenerateBlock()
 		return;
 	}
 
+	CurBlock = SpawnedBlock;
+	CurBlock->Y = 1;
+	CurBlock->X = Mid;
+
 	FVector GenerateLoc(0.f, 0.f, FrameZEnd);
 	if (BlockType == EBlockType::Hero)
 	{
 		GenerateLoc.Z -= 100.f;
+		CurBlock->Y = 3;
+		CurBlock->X = Mid;
 	}
-
-	CurBlock = SpawnedBlock;
+	
 	CurBlock->SetBlockType(BlockType);
 	CurBlock->SetActorLocation(GenerateLoc);
 
@@ -137,9 +144,9 @@ bool APlayGameMode::IsOccupied(const TPair<int, int>& _Pair)
 	return false;
 }
 
-bool APlayGameMode::CanMove(int I, int J)
+bool APlayGameMode::CanMove(int I, int J, int _Degree)
 {
-	TArray<TPair<int, int>> Idxs = CurBlock->GetBlockIndices(I, J);
+	TArray<TPair<int, int>> Idxs = CurBlock->GetBlockIndices(I, J, _Degree);
 
 	bool IsAllPass = true;
 	for (int i = 0, size = Idxs.Num(); i < size; ++i)
@@ -193,27 +200,27 @@ void APlayGameMode::MoveBlock(EBlockDirection _Dir)
 		return;
 	}
 
-	FVector DstLoc = CurBlock->GetActorLocation();
+	int I = CurBlock->Y;
+	int J = CurBlock->X;
+
 	if (_Dir == EBlockDirection::Left)
 	{
-		DstLoc.Y -= DIAMETER;
+		J -= 1;
 	}
 	else if (_Dir == EBlockDirection::Right)
 	{
-		DstLoc.Y += DIAMETER;
+		J += 1;
 	}
 	else if (_Dir == EBlockDirection::Down)
 	{
-		DstLoc.Z -= DIAMETER;
+		I += 1;
 	}
-
-	int I = InitData.Rows - StaticCast<int>(DstLoc.Z / DIAMETER) + 1;
-	int J = StaticCast<int>(DstLoc.Y / DIAMETER) + 1;
-	UE_LOG(LogTemp, Warning, TEXT("%d, %d"), I, J);
 
 	if (CanMove(I, J))
 	{
-		CurBlock->Move(_Dir);
+		CurBlock->Move((InitData.Rows - 1) - I, J, FrameYStart);
+		CurBlock->Y = I;
+		CurBlock->X = J;
 	}
 	else
 	{
@@ -222,5 +229,22 @@ void APlayGameMode::MoveBlock(EBlockDirection _Dir)
 			CanGenerate = true;
 			UpdateTetrisLocation(I - 1, J);
 		}
+	}
+}
+
+void APlayGameMode::RotateBlock()
+{
+	if (CurBlock == nullptr)
+	{
+		return;
+	}
+
+	int I = CurBlock->Y;
+	int J = CurBlock->X;
+
+	int Degree = CurBlock->GetFutureDegree();
+	if (CanMove(I, J, Degree))
+	{
+		CurBlock->Rotate();
 	}
 }

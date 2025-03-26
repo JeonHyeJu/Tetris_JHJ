@@ -57,6 +57,17 @@ EBlockDirection APlayCharacter::GetDirection(const FVector2D& _Vec)
 	return Dir;
 }
 
+void APlayCharacter::OnInputRotate(bool _IsPressed)
+{
+	APlayGameMode* GameMode = Cast<APlayGameMode>(GetWorld()->GetAuthGameMode());
+	if (GameMode == nullptr)
+	{
+		return;
+	}
+
+	GameMode->RotateBlock();
+}
+
 void APlayCharacter::OnMove(const FVector2D& _Vec)
 {
 	if (CanMove == false)
@@ -64,7 +75,6 @@ void APlayCharacter::OnMove(const FVector2D& _Vec)
 		return;
 	}
 
-	//UE_LOG(LogTemp, Log, TEXT("%f %f"), _Vec.X, _Vec.Y);
 	//AddMovementInput(FVector(_Vec.X, _Vec.Y, 0.f));
 
 	APlayGameMode* GameMode = Cast<APlayGameMode>(GetWorld()->GetAuthGameMode());

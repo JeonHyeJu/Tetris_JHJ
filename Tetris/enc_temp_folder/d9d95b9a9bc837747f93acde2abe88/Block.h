@@ -32,8 +32,6 @@ public:
 	int X = 0;
 	int Y = 0;
 
-	FVector InitialLoc = FVector::ZeroVector;
-
 protected:
 	virtual void BeginPlay() override;
 	
