@@ -224,9 +224,25 @@ void APlayGameMode::CheckToStone()
 		}
 	}
 
+	int RmSize = RemoveRows.Num();
+	for (int i = 0; i < RmSize; ++i)
+	{
+		int RmIdx = RemoveRows[i];
+		if (RmIdx <= 0)
+		{
+			continue;
+		}
+
+		int Cols = Tetris[RmIdx].Num();
+		for (int j = 0; j < Cols; ++j)
+		{
+			Tetris[RmIdx][j] = Tetris[RmIdx - 1][j];
+			Tetris[RmIdx - 1][j] = false;
+		}
+	}
+
 	TArray<int> RemoveIdx;
 	int Size = StaticBlocks.Num();
-	int RmSize = RemoveRows.Num();
 	for (int i = 0; i < Size; ++i)
 	{
 		if (StaticBlocks[i].IsDestroied)
@@ -241,6 +257,15 @@ void APlayGameMode::CheckToStone()
 			{
 				IsRemove = true;
 				break;
+			}
+			else if (StaticBlocks[i].I < RemoveRows[j])
+			{
+				float Z = StaticBlocks[i].Block->GetActorLocation().Z;
+				if (Z > 200)
+				{
+					StaticBlocks[i].Block->AddActorLocalOffset(FVector(0.f, 0.f, -100.f));
+					StaticBlocks[i].I += 1;
+				}
 			}
 		}
 
@@ -257,17 +282,10 @@ void APlayGameMode::CheckToStone()
 		return _V1 > _V2;
 	});
 
-	StaticBlocks;
-	Tetris;
-	int a = 0;
-
 	for (int i = 0; i < RemoveIdx.Num(); ++i)
 	{
 		StaticBlocks.RemoveAt(RemoveIdx[i]);
 	}
-	StaticBlocks;
-	Tetris;
-	int b = 0;
 }
 
 bool APlayGameMode::SetTetris(int I, int J)

@@ -60,9 +60,6 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawner", meta = (AllowPrivateAccess="true"))
 	TSubclassOf<AActor> OneBlock = nullptr;
 
-	//UPROPERTY()
-	//TArray<class ABlock*> Blocks;
-
 	UPROPERTY()
 	TArray<FBlockData> StaticBlocks;
 
